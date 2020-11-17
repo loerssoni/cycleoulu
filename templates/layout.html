@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+    <head>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" crossorigin="anonymous">
+        <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.0.0/mapbox-gl.js'></script>
+        <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.0.0/mapbox-gl.css' rel='stylesheet' />
+    </head>
+  <body>
+    {% block content %}
+    <div class="container">
+        <div id='map' style='width: 800px; height: 600px;'></div>
+        <script src="{{ url_for('static', filename = 'config.js') }}"></script>
+        <script>
+            mapboxgl.accessToken = config.accessToken
+            var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v9',
+            center: [25.4606, 65.0241],
+            zoom: 11
+            });
+            map.on('load', function() {
+            var geojsonData = {
+                "type": "FeatureCollection",
+                "features": [{
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [25.4606, 65.0241],
+                }
+                }]
+            };
+            var geojsonData = JSON.parse('{{ geodata|safe }}')
+            for (i = 0; i < geojsonData.length; i++) {
+                map.addLayer({
+                "id": "points"+i,
+                "type": "circle",
+                "source": {
+                "type": "geojson",
+                "data": geojsonData[i]
+                }
+                })
+            }
+                
+            
+            })
+        </script>
+    </div>
+    {% endblock %}
+    </div>
+  </body>
+</html>

@@ -1,0 +1,4 @@
+*.ipynb
+*.pyc
+static/config.js
+data/routes/*
