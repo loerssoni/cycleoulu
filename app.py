@@ -16,7 +16,12 @@ def traffic():
     data = get_traffic_announcements()
     geojson = [i['geojson'] for i in data]
     geojson = json.dumps(geojson)
-    return render_template("layout.html", geodata = geojson)
+    descriptions = [i['descriptions'] for i in data]
+    descriptions = json.dumps(descriptions)
+    print(descriptions)
+    template =  render_template("layout.html", geodata = geojson,
+            descriptions = descriptions)
+    return template
 
 
 if __name__ == '__main__':

@@ -16,8 +16,9 @@
             container: 'map',
             style: 'mapbox://styles/mapbox/streets-v9',
             center: [25.4606, 65.0241],
-            zoom: 11
+            zoom: 12
             });
+
             map.on('load', function() {
             var geojsonData = {
                 "type": "FeatureCollection",
@@ -29,19 +30,61 @@
                 }
                 }]
             };
-            var geojsonData = JSON.parse('{{ geodata|safe }}')
+            var markerTypes = {
+                "LineString": "line",
+                "Polygon": "fill",
+                "Point": "circle"
+            };
+            var paintTypes = {
+                "LineString": {
+                    "line-color": "#088",
+                    "line-opacity": 0.5,
+                    "line-width":8
+                },
+                "Polygon": {
+                    "fill-color": "#088",
+                    "fill-opacity": 0.5
+                },
+                "Point": {
+                    "circle-color": "#088",
+                    "circle-opacity":0.5,
+                    "circle-radius":8
+                }
+            };
+
+            var geojsonData = JSON.parse('{{ geodata|safe }}');
+            var descriptionData = JSON.parse('{{ descriptions|safe }}');
             for (i = 0; i < geojsonData.length; i++) {
+                var geometryType = geojsonData[i].features[0].geometry.type
+                var description = descriptionData[i]
+                geojsonData[i].features[0].properties.description = description
                 map.addLayer({
                 "id": "points"+i,
-                "type": "circle",
+                "type": markerTypes[geometryType],
                 "source": {
                 "type": "geojson",
-                "data": geojsonData[i]
-                }
+                "data": geojsonData[i],
+                },
+                "paint": paintTypes[geometryType]
                 })
-            }
                 
-            
+                
+                map.on('click', 'points'+i, function (e) {
+                    
+                    new mapboxgl.Popup()
+                        .setLngLat(e.lngLat)
+                        .setHTML(e.features[0].properties.description)
+                        .addTo(map);
+                });
+                map.on('mouseenter', 'points'+i, function () {
+                map.getCanvas().style.cursor = 'pointer';
+                });
+                
+                // Change it back to a pointer when it leaves.
+                map.on('mouseleave', 'points'+i, function () {
+                map.getCanvas().style.cursor = '';
+                });
+            }
             })
         </script>
     </div>
